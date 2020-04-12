@@ -9,15 +9,33 @@ const estimate = require("./src/estimator");
 const PORT = process.env.PORT || 5000;
 
 const server = http.createServer();
+let currentTime = null;
 
 server.on("request", (req, res) => {
+  currentTime = Date.now();
+  console.log("time", currentTime)
   const body = [];
+  const parsedUrl = url.parse(req.url, true);
 
   req.on("error", (err) => console.error("request error"));
   res.on("error", (err) => console.error(err, "response error"));
-
-  const parsedUrl = url.parse(req.url, true);
+  // res.on('close', () => console.log("Diff", Date.now() - currentTime))
+  // res.on('close', () => console.log(res.statusCode))
+  res.on('close', () => {
+    let timeDiff = Date.now() - currentTime;
+    if (timeDiff < 10) {
+      timeDiff = "0" + timeDiff
+    }
+    const logText = `${req.method}\t\t${parsedUrl.pathname}\t\t${res.statusCode}\t\t${timeDiff}ms\n`;
+    fs.appendFile("./src/log.txt", logText, (err) => {
+      if(err) throw err;
+      console.log('File appended to')
+    })
+  })
+  
+  // const parsedUrl = url.parse(req.url, true);
   if (req.method === "GET" && parsedUrl.pathname === "/") {
+    res.writeHead(200, { "Content-Type": "text/html" });
     // fs.createReadStream(path.join(__dirname, 'src', 'index.html')).pipe(res);
     fs.createReadStream("./src/index.html").pipe(res);
     console.log(parsedUrl.pathname);
@@ -84,6 +102,9 @@ server.on("request", (req, res) => {
         res.end();
 
       });
+  } else if (req.method === 'GET' && parsedUrl.pathname === "/api/v1/on-covid-19/log") {
+    res.writeHead(200, { "Content-Type": "text/plain" });
+    fs.createReadStream("./src/log.txt").pipe(res);
   } else {
     res.writeHead(404, {
       "X-Powered-By": "Node",

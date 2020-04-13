@@ -97,7 +97,7 @@ server.on("request", (req, res) => {
         // const xmlData = xml(estimatedData);
         const xmlBuild = builder.create(estimatedData).end({pretty: false})
 
-        res.writeHead(200, { "Content-Type": "text/xml" });
+        res.writeHead(200, { "Content-Type": "application/xml" });
         res.write(xmlBuild);
         res.end();
 

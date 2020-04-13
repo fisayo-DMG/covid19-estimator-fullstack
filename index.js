@@ -102,7 +102,7 @@ server.on("request", (req, res) => {
         res.end();
 
       });
-  } else if (req.method === 'GET' && parsedUrl.pathname === "/api/v1/on-covid-19/log") {
+  } else if (req.method === 'GET' && parsedUrl.pathname === "/api/v1/on-covid-19/logs") {
     res.writeHead(200, { "Content-Type": "text/plain" });
     fs.createReadStream("./src/log.txt").pipe(res);
   } else {
